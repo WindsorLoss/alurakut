@@ -1,7 +1,7 @@
 import MainGrid from '../src/components/MainGrid'
 import Box from '../src/components/Box'
 import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/lib/AlurakutCommons'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { RelationsDisplay } from '../src/components/RelationsDisplay'
 
 function ProfileSidebar({ user }) {
@@ -32,34 +32,42 @@ export default function Home() {
 
   const amigos = [{
     id: new Date(),
-    title: 'juunegreiros',
+    name: 'juunegreiros',
     image: 'https://github.com/juunegreiros.png',
     url: 'https://github.com/juunegreiros'
   }, {
     id: new Date(),
-    title: 'omariosouto',
+    name: 'omariosouto',
     image: 'https://github.com/omariosouto.png',
     url: 'https://github.com/omariosouto'
   }, {
     id: new Date(),
-    title: 'peas',
+    name: 'peas',
     image: 'https://github.com/peas.png',
     url: 'https://github.com/peas'
   }, {
     id: new Date(),
-    title: 'rafaballerini',
+    name: 'rafaballerini',
     image: 'https://github.com/rafaballerini.png',
     url: 'https://github.com/rafaballerini'
   }, {
     id: new Date(),
-    title: 'felipefialho',
+    name: 'felipefialho',
     image: 'https://github.com/felipefialho.png',
     url: 'https://github.com/felipefialho'
   }]
 
+  const [seguidores, setSeguidores] = useState([]) 
+  
+  useEffect(() => {
+    fetch('https://api.github.com/users/windsorloss/followers')
+      .then((res) => res.json())
+      .then((res) => setSeguidores(res))
+  }, [])
+
   const [comunidades, setComunidades] = useState([{
     id: '1',
-    title: 'Eu odeio acordar cedo',
+    name: 'Eu odeio acordar cedo',
     image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg'
   }])
 
@@ -130,6 +138,7 @@ export default function Home() {
         <div className="profileRelationsArea" style={{gridArea: 'profileRelationsArea'}}>
           
           <RelationsDisplay title='Meus amigos' relationsItems={amigos}/>
+          <RelationsDisplay title='Seguidores Github' relationsItems={seguidores}/>
           <RelationsDisplay title='Minhas comunidades' relationsItems={comunidades}/>
           
         </div>
