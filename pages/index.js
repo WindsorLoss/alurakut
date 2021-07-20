@@ -30,46 +30,63 @@ export default function Home() {
 
   const githubUser = 'windsorloss'
 
-  const amigos = [{
-    id: new Date(),
-    name: 'juunegreiros',
-    image: 'https://github.com/juunegreiros.png',
-    url: 'https://github.com/juunegreiros'
-  }, {
-    id: new Date(),
-    name: 'omariosouto',
-    image: 'https://github.com/omariosouto.png',
-    url: 'https://github.com/omariosouto'
-  }, {
-    id: new Date(),
-    name: 'peas',
-    image: 'https://github.com/peas.png',
-    url: 'https://github.com/peas'
-  }, {
-    id: new Date(),
-    name: 'rafaballerini',
-    image: 'https://github.com/rafaballerini.png',
-    url: 'https://github.com/rafaballerini'
-  }, {
-    id: new Date(),
-    name: 'felipefialho',
-    image: 'https://github.com/felipefialho.png',
-    url: 'https://github.com/felipefialho'
-  }]
-
+  const [amigos, setAmigos] = useState([])
   const [seguidores, setSeguidores] = useState([]) 
+  const [comunidades, setComunidades] = useState([])
   
   useEffect(() => {
     fetch('https://api.github.com/users/windsorloss/followers')
       .then((res) => res.json())
       .then((res) => setSeguidores(res))
+
+    // API GraphQL
+    fetch('https://graphql.datocms.com/', {
+      method: 'POST',
+      headers: {
+        'Authorization': '50d571c41be7ca78324481793e3f37',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ "query": `query {
+        allCommunities {
+          id,
+          name,
+          image,
+          creatorSlug
+        }
+      }` })
+    })
+      .then(res => res.json())
+      .then(res => {
+        const comunidades = res.data.allCommunities
+        setComunidades(comunidades)
+      })
+
+    fetch('https://graphql.datocms.com/', {
+      method: 'POST',
+      headers: {
+        'Authorization': '50d571c41be7ca78324481793e3f37',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ "query": `query {
+        allFriends {
+          id,
+          name,
+          url,
+          image
+        }
+      }` })
+    })
+      .then(res => res.json())
+      .then(res => {
+        const amigos = res.data.allFriends
+        setAmigos(amigos)
+      })
+
+
   }, [])
 
-  const [comunidades, setComunidades] = useState([{
-    id: '1',
-    name: 'Eu odeio acordar cedo',
-    image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg'
-  }])
 
   function handleCriaComunidade(e) {
     e.preventDefault()
@@ -78,12 +95,11 @@ export default function Home() {
     
     const novaComunidade = {
       id: new Date(),
-      title: dadosDoForm.get('title'),
-      image: dadosDoForm.get('image')
+      name: dadosDoForm.get('title'),
+      image: dadosDoForm.get('image') || 'https://placehold.it/300x300'
     }
 
     setComunidades([...comunidades, novaComunidade])
-    dadosDoForm.delete('title')
   }
 
 
