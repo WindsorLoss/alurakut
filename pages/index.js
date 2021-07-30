@@ -94,12 +94,25 @@ export default function Home() {
     const dadosDoForm = new FormData(e.target)
     
     const novaComunidade = {
-      id: new Date(),
       name: dadosDoForm.get('title'),
-      image: dadosDoForm.get('image') || 'https://placehold.it/300x300'
+      image: dadosDoForm.get('image') || 'https://placehold.it/300x300',
+      creatorSlug: githubUser
     }
 
-    setComunidades([...comunidades, novaComunidade])
+    fetch('/api/comunidades', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(novaComunidade)
+    })
+      .then(async response => {
+        const { registroCriado } = await response.json();
+        setComunidades([...comunidades, registroCriado])
+        console.log(registroCriado)
+      })
+
   }
 
 
@@ -127,9 +140,9 @@ export default function Home() {
 
               <div>
                 <input 
-                  placeholder='Qual vai ser o nome da sua comunidade?' 
+                  placeholder='Qual será o nome da sua comunidade?' 
                   name='title' 
-                  aria-label='Qual vai ser o nome da sua comunidade?'
+                  aria-label='Qual será o nome da sua comunidade?'
                   type='text'
                 />
               </div>
@@ -149,6 +162,7 @@ export default function Home() {
             </form>
 
           </Box>
+
         </div>
 
         <div className="profileRelationsArea" style={{gridArea: 'profileRelationsArea'}}>
