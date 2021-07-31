@@ -4,6 +4,9 @@ import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet 
 import { useEffect, useState } from 'react'
 import { RelationsDisplay } from '../src/components/RelationsDisplay'
 
+import nookies from 'nookies'
+import jwt from 'jsonwebtoken'
+
 function ProfileSidebar({ user }) {
   return (
     <Box as='aside'>
@@ -26,9 +29,9 @@ function ProfileSidebar({ user }) {
 
 }
 
-export default function Home() {
+export default function Home(props) {
 
-  const githubUser = 'windsorloss'
+  const githubUser = props.githubUser
 
   const [amigos, setAmigos] = useState([])
   const [seguidores, setSeguidores] = useState([]) 
@@ -95,15 +98,14 @@ export default function Home() {
     
     const novaComunidade = {
       name: dadosDoForm.get('title'),
-      image: dadosDoForm.get('image') || 'https://placehold.it/300x300',
+      image: dadosDoForm.get('image') || 'http://placehold.it/300x300',
       creatorSlug: githubUser
     }
 
     fetch('/api/comunidades', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(novaComunidade)
     })
@@ -177,4 +179,33 @@ export default function Home() {
 
     </>
   )
+}
+
+export async function getServerSideProps(context) {
+  
+  const token = nookies.get(context).USER_TOKEN
+  
+  const { isAuthenticated } = await fetch('https://alurakut.vercel.app/api/auth', {
+    headers: {
+      Authorization: token
+    }
+  })
+  .then(res => res.json())
+  
+  if(!isAuthenticated) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false
+      }
+    }
+  }
+  
+  const { githubUser } = jwt.decode(token)
+  
+  return {
+    props: {
+      githubUser
+    },
+  }
 }
